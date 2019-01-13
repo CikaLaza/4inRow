@@ -1,0 +1,40 @@
+td {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    text-align: center;
+    border: 2px solid blue;
+}
+
+.redborder {
+    background-color: red;
+    color: white;
+}
+
+.blueborder {
+    background-color: blue;
+    color: white;
+}
+
+@-webkit-keyframes blinking {
+  from { border-width: 3px }
+  to { border-width: inherit}
+}
+@-moz-keyframes blinking {
+  from { border-width: 3px }
+  to { border-width: inherit}
+}
+@-o-keyframes blinking {
+  from { background-color: red; border-width: 5px }
+  to { background-color: inherit; border-width: inherit}
+}
+@keyframes blinking {
+  from { border-width: 3px }
+  to { border-width: inherit}
+}
+.blinking {
+  -webkit-animation: blinking 1s infinite; /* Safari 4+ */
+  -moz-animation:    blinking 1s infinite; /* Fx 5+ */
+  -o-animation:      blinking 1s infinite; /* Opera 12+ */
+  animation:         blinking 1s infinite; /* IE 10+ */
+}
