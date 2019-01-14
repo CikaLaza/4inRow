@@ -1,9 +1,33 @@
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: black; /* For browsers that do not support gradients */
+    background-image: linear-gradient(to bottom right, black, darkgreen);
+}
+h3,button {
+	padding: 10px 24px;
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+    outline:none;
+    font-size: 18px;
+    font-weight: bold;
+    color:gray;
+    font-family: "Verdana", Geneva, sans-serif;
+}
 td {
-    width: 32px;
-    height: 32px;
+    width: 40px; /* 10%; */
+    height: 40px; /* 10%;*/
     cursor: pointer;
     text-align: center;
-    border: 2px solid blue;
+    border: 3px solid blue;
 }
 
 .redborder {
@@ -17,11 +41,11 @@ td {
 }
 
 @-webkit-keyframes blinking {
-  from { border-width: 3px }
+  from { border-width: 4px }
   to { border-width: inherit}
 }
 @-moz-keyframes blinking {
-  from { border-width: 3px }
+  from { border-width: 4px }
   to { border-width: inherit}
 }
 @-o-keyframes blinking {
@@ -29,7 +53,7 @@ td {
   to { background-color: inherit; border-width: inherit}
 }
 @keyframes blinking {
-  from { border-width: 3px }
+  from { border-width: 4px }
   to { border-width: inherit}
 }
 .blinking {

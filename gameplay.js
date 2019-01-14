@@ -1,5 +1,6 @@
 var boardRows = 6;
 var boardCols = 7;
+var botPlaying = false;
 
 $(function() { //on load
     printBoard(boardRows, boardCols);
@@ -7,6 +8,10 @@ $(function() { //on load
     {
         $( "#mainBoard" ).remove();
         printBoard(boardRows, boardCols);
+    });
+    $("#botPlayBtn").click(function()
+    {
+        botPlaying = !botPlaying;
     });
 });
 
@@ -17,6 +22,7 @@ function printBoard(i_BoardRows, i_BoardCols)
     var color = 'rgba(255, 0, 0, 0.8)';
     var emptyColor = "rgba(0, 0, 0, 0)";
     var startTime = 0;
+    var winningCells = [];
     
     var lastPlayedRow = 0;
     var lastPlayedCol = 0;
@@ -31,28 +37,35 @@ function printBoard(i_BoardRows, i_BoardCols)
         for (var col = 0; col < maxCol; col++)
             myRow.append("<td id='cell-" + row + "-" + col +"' ></td>");
     }
+    $("#status").text("Red moves");
+
+
     $("td[id^=cell]").click(function()
     {
         if(gameover || animationRunning) return;
         
         coordinates = $(this).attr("id").split('-');
-        
-        lastPlayedCol = parseInt(coordinates[2]);
-        lastPlayedRow = getAvailableRow( parseInt(coordinates[1]), lastPlayedCol);
+        playMove( parseInt(coordinates[1]), parseInt(coordinates[2]) );
+    });
+    
+    function playMove(row, column)
+    {
+        lastPlayedCol = parseInt(column);
+        lastPlayedRow = getAvailableRow( row, lastPlayedCol);
         
         if (lastPlayedRow != -1) {
             startTime = window.performance.now();
             lastColor = color;
             animateCoinFall();
         }
-    });
+	}
     
     function onMovePlayed()
     {
-        $('#cell-' + lastPlayedRow + '-' + lastPlayedCol).css("backgroundColor", color);
+		$('#cell-' + lastPlayedRow + '-' + lastPlayedCol).css("backgroundColor", color);
         
         if (lastPlayedRow == (maxRow -1) && checkDraw()) {
-            setTimeout(function() { alert('DRAW'); }, 1);
+            setTimeout(function() { $("#status").text("DRAW"); }, 1);
             gameover = true;
             return;
         }
@@ -62,15 +75,24 @@ function printBoard(i_BoardRows, i_BoardCols)
             checkDiagonalWin(lastPlayedRow, lastPlayedCol) )
         {
             if (turno) 
-                setTimeout(function() { alert('RED WINS!'); }, 1);
+                setTimeout(function() { $("#status").text("RED WINS!"); }, 1);
             else
-                setTimeout(function() { alert('YELLOW WINS!'); }, 1);
+                setTimeout(function() { $("#status").text("YELLOW WINS!"); }, 1);
             gameover = true;
             
             $('#cell-' + lastPlayedRow + '-' + lastPlayedCol).addClass("blinking");
+            winningCells.forEach(function(element) {
+				console.log(element);
+				$(element).addClass("blinking");
+			});
         }
         
         turnPlayers();
+        
+        if (botPlaying)
+        {
+			getBotMove();
+		}
     }
     
     function turnPlayers()
@@ -78,10 +100,12 @@ function printBoard(i_BoardRows, i_BoardCols)
         if(turno){
             color = 'rgba(255, 255, 0, 0.8)';
             turno=false;
+            $("#status").text("Yellow moves");
         }
         else{
             color = 'rgba(255, 0, 0, 0.8)';
             turno=true;
+            $("#status").text("Red moves");
         }
     }
 
@@ -101,8 +125,10 @@ function printBoard(i_BoardRows, i_BoardCols)
         {
             var rightCell = $('#cell-' + row + '-' + right);
             //console.log("rightCell: " + row + ", " + right + " bg-color: " + rightCell.css("backgroundColor") + " vs " + color);
-            if( rightCell.css('backgroundColor') == color)
+            if( rightCell.css('backgroundColor') == color) {
+                winningCells.push("#cell-" + row + '-' + right);
                 vertical++;
+			}
             else
                 break;
         }
@@ -110,14 +136,17 @@ function printBoard(i_BoardRows, i_BoardCols)
         for(var left = col - 1; left >= 0 ; left--)
         {
             var leftCell = $('#cell-' + row + '-' + left);
-            if( leftCell.css('backgroundColor') == color)
+            if( leftCell.css('backgroundColor') == color) {
+                winningCells.push("#cell-" + row + '-' + left);
                 vertical++;
+			}
             else
                 break;
         }
         
-        if (vertical == 3) return true;
-        else return false;
+        if (vertical >= 3) return true;
+        winningCells = [];
+        return false;
     }
     
     
@@ -128,13 +157,16 @@ function printBoard(i_BoardRows, i_BoardCols)
         for(var i = row - 1; i >= 0; i--)
         {
             var currentCell = $('#cell-' + i + '-' + col);
-            if( currentCell.css('backgroundColor') == color)
+            if( currentCell.css('backgroundColor') == color) {
+                winningCells.push("#cell-" + i + '-' + col);
                 horizontal++;
+			}
             else
                 break;
         }
-        if (horizontal == 3) return true;
-        else return false;
+        if (horizontal >= 3) return true;
+        winningCells = [];
+        return false;
     }
     
     function checkDiagonalWin(row, col)
@@ -145,8 +177,10 @@ function printBoard(i_BoardRows, i_BoardCols)
         {
             var currentCell = $('#cell-' + i + '-' + j);
             //console.log("currentCell: " + i + ", " + j + " bg-color: " + currentCell.css("backgroundColor") + " vs " + color);
-            if( currentCell.css('backgroundColor') == color)
+            if( currentCell.css('backgroundColor') == color) {
+                winningCells.push("#cell-" + i + '-' + j);
                 cnt++;
+			}
             else
                 break;
         }
@@ -154,19 +188,25 @@ function printBoard(i_BoardRows, i_BoardCols)
         for(var i = row + 1, j = col + 1; i < maxRow && j < maxCol; i++, j++)
         {
             var currentCell = $('#cell-' + i + '-' + j);
-            if( currentCell.css('backgroundColor') == color)
+            if( currentCell.css('backgroundColor') == color) {
+                winningCells.push("#cell-" + i + '-' + j);
                 cnt++;
+			}
             else
                 break;
         }
-        if (cnt == 3) return true;
-        else cnt = 0;
+        if (cnt >= 3) return true;
+        
+        winningCells = [];
+        cnt = 0;
         
         for(var i = row + 1, j = col - 1; i < maxRow && j >= 0; i++, j--)
         {
             var currentCell = $('#cell-' + i + '-' + j);
-            if( currentCell.css('backgroundColor') == color)
+            if( currentCell.css('backgroundColor') == color) {
+                winningCells.push("#cell-" + i + '-' + j);
                 cnt++;
+			}
             else
                 break;
         }
@@ -174,13 +214,16 @@ function printBoard(i_BoardRows, i_BoardCols)
         for(var i = row - 1, j = col + 1; i >= 0 && j < maxCol; i--, j++)
         {
             var currentCell = $('#cell-' + i + '-' + j);
-            if( currentCell.css('backgroundColor') == color)
+            if( currentCell.css('backgroundColor') == color) {
+                winningCells.push("#cell-" + i + '-' + j);
                 cnt++;
+			}
             else
                 break;
         }
-        if (cnt == 3) return true;
-        else return false;
+        if (cnt >= 3) return true;
+        winningCells = [];
+        return false;
     }
     
     function checkDraw()
@@ -265,4 +308,19 @@ function printBoard(i_BoardRows, i_BoardCols)
         }
     }
     //// animation 
+
+	function getBotMove()
+	{
+		if(gameover || animationRunning) return;
+		const Url = "http://192.168.0.22:9090/getMove";
+		$.get(Url, function(data, status)
+		{
+			var jsonString = JSON.stringify(data);
+			var result = JSON.parse(jsonString);
+			console.log("Reply: " + result);
+			playMove( maxRow - 1, parseInt(result));
+		});
+	}
+
 }
+
